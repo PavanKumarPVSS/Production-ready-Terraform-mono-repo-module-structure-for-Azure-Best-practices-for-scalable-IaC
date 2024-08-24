@@ -1,5 +1,5 @@
 module "ResourceGroup" {
-  source              = "./ResourceGroup"
+  source              = "https://github.com/PavanKumarPVSS/Terraform-single-repo-module-structure/tree/6b35d43bab30e88d903e12d40298a87be11b5691/ResourceGroup"
   resource_group_name = var.resource_group_name
   location            = var.location
   tags                = var.tags
