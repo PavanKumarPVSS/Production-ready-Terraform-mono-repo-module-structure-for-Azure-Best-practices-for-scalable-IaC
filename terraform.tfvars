@@ -1,0 +1,5 @@
+resource_group_name  = "rg-testing"
+location             = "East US"
+environment          = "development"
+storage_account_name = "tfstatetesting12345"
+container_name       = "tfstate"
