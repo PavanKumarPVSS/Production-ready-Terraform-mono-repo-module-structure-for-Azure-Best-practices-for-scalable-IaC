@@ -1,7 +1,7 @@
 trigger: none
 
 pool:
-  vmImage: 'ubuntu-latest'
+  name: 'Agent'
 
 variables:
   - name: workingDirectory
@@ -18,7 +18,7 @@ stages:
             displayName: 'Terraform Init'
             inputs:
               azureSubscription: 'terraformdeployement'
-              scriptType: 'bash'
+              scriptType: 'ps'
               scriptLocation: 'inlineScript'
               inlineScript: |
                 cd $(workingDirectory)
@@ -28,7 +28,7 @@ stages:
             displayName: 'Terraform Validate'
             inputs:
               azureSubscription: 'terraformdeployement'
-              scriptType: 'bash'
+              scriptType: 'ps'
               scriptLocation: 'inlineScript'
               inlineScript: |
                 cd $(workingDirectory)
@@ -46,7 +46,7 @@ stages:
             displayName: 'Terraform Init'
             inputs:
               azureSubscription: 'terraformdeployement'
-              scriptType: 'bash'
+              scriptType: 'ps'
               scriptLocation: 'inlineScript'
               inlineScript: |
                 cd $(workingDirectory)
@@ -56,7 +56,7 @@ stages:
             displayName: 'Terraform Plan'
             inputs:
               azureSubscription: 'terraformdeployement'
-              scriptType: 'bash'
+              scriptType: 'ps'
               scriptLocation: 'inlineScript'
               inlineScript: |
                 cd $(workingDirectory)
@@ -93,7 +93,7 @@ stages:
                   displayName: 'Terraform Init'
                   inputs:
                     azureSubscription: 'terraformdeployement'
-                    scriptType: 'bash'
+                    scriptType: 'ps'
                     scriptLocation: 'inlineScript'
                     inlineScript: |
                       cd $(workingDirectory)
@@ -103,7 +103,7 @@ stages:
                   displayName: 'Terraform Apply'
                   inputs:
                     azureSubscription: 'terraformdeployement'
-                    scriptType: 'bash'
+                    scriptType: 'ps'
                     scriptLocation: 'inlineScript'
                     inlineScript: |
                       cd $(workingDirectory)
