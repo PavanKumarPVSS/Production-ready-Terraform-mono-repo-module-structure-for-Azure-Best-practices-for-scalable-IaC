@@ -16,7 +16,7 @@ stages:
           - task: AzureCLI@2
             displayName: 'Terraform Init'
             inputs:
-              azureSubscription: 'terraform-deployment'
+              azureSubscription: 'terraformdeployement'
               scriptType: 'bash'
               scriptLocation: 'inlineScript'
               inlineScript: |
@@ -26,7 +26,7 @@ stages:
           - task: AzureCLI@2
             displayName: 'Terraform Validate'
             inputs:
-              azureSubscription: 'terraform-deployment'
+              azureSubscription: 'terraformdeployement'
               scriptType: 'bash'
               scriptLocation: 'inlineScript'
               inlineScript: |
@@ -44,7 +44,7 @@ stages:
           - task: AzureCLI@2
             displayName: 'Terraform Init'
             inputs:
-              azureSubscription: 'terraform-deployment'
+              azureSubscription: 'terraformdeployement'
               scriptType: 'bash'
               scriptLocation: 'inlineScript'
               inlineScript: |
@@ -54,7 +54,7 @@ stages:
           - task: AzureCLI@2
             displayName: 'Terraform Plan'
             inputs:
-              azureSubscription: 'terraform-deployment'
+              azureSubscription: 'terraformdeployement'
               scriptType: 'bash'
               scriptLocation: 'inlineScript'
               inlineScript: |
@@ -91,7 +91,7 @@ stages:
                 - task: AzureCLI@2
                   displayName: 'Terraform Init'
                   inputs:
-                    azureSubscription: 'terraform-deployment'
+                    azureSubscription: 'terraformdeployement'
                     scriptType: 'bash'
                     scriptLocation: 'inlineScript'
                     inlineScript: |
@@ -101,7 +101,7 @@ stages:
                 - task: AzureCLI@2
                   displayName: 'Terraform Apply'
                   inputs:
-                    azureSubscription: 'terraform-deployment'
+                    azureSubscription: 'terraformdeployement'
                     scriptType: 'bash'
                     scriptLocation: 'inlineScript'
                     inlineScript: |
