@@ -5,7 +5,7 @@ terraform {
       version = "~> 3.0"
     }
   }
-  
+
   # Backend configuration - values provided via pipeline variables
   backend "azurerm" {
   }

@@ -63,11 +63,11 @@ module "databricks_workspace" {
   network_security_group_rules_required = "NoAzureDatabricksRules"
   no_public_ip                          = var.databricks_no_public_ip
 
-  virtual_network_id                   = module.databricks_vnet.vnet_id
-  public_subnet_name                   = module.databricks_vnet.public_subnet_name
-  private_subnet_name                  = module.databricks_vnet.private_subnet_name
-  public_subnet_nsg_association_id     = module.databricks_vnet.public_nsg_id
-  private_subnet_nsg_association_id    = module.databricks_vnet.private_nsg_id
+  virtual_network_id                = module.databricks_vnet.vnet_id
+  public_subnet_name                = module.databricks_vnet.public_subnet_name
+  private_subnet_name               = module.databricks_vnet.private_subnet_name
+  public_subnet_nsg_association_id  = module.databricks_vnet.public_nsg_id
+  private_subnet_nsg_association_id = module.databricks_vnet.private_nsg_id
 
   tags = {
     environment = var.environment
