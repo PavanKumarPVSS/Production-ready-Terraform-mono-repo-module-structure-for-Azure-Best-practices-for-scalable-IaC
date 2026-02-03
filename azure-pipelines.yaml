@@ -6,6 +6,7 @@ pool:
 variables:
   - name: workingDirectory
     value: '$(System.DefaultWorkingDirectory)'
+  - group: 'TFstate-variables'
 
 stages:
   - stage: Validate
@@ -22,7 +23,11 @@ stages:
               scriptLocation: 'inlineScript'
               inlineScript: |
                 cd $(workingDirectory)
-                terraform init
+                terraform init `
+                  -backend-config="resource_group_name=$(tfstate_resource_group_name)" `
+                  -backend-config="storage_account_name=$(tfstate_storage_account_name)" `
+                  -backend-config="container_name=$(tfstate_container_name)" `
+                  -backend-config="key=$(tfstate_key)"
 
           - task: AzureCLI@2
             displayName: 'Terraform Validate'
@@ -50,7 +55,11 @@ stages:
               scriptLocation: 'inlineScript'
               inlineScript: |
                 cd $(workingDirectory)
-                terraform init
+                terraform init `
+                  -backend-config="resource_group_name=$(tfstate_resource_group_name)" `
+                  -backend-config="storage_account_name=$(tfstate_storage_account_name)" `
+                  -backend-config="container_name=$(tfstate_container_name)" `
+                  -backend-config="key=$(tfstate_key)"
 
           - task: AzureCLI@2
             displayName: 'Terraform Plan'
@@ -97,7 +106,11 @@ stages:
                     scriptLocation: 'inlineScript'
                     inlineScript: |
                       cd $(workingDirectory)
-                      terraform init
+                      terraform init `
+                        -backend-config="resource_group_name=$(tfstate_resource_group_name)" `
+                        -backend-config="storage_account_name=$(tfstate_storage_account_name)" `
+                        -backend-config="container_name=$(tfstate_container_name)" `
+                        -backend-config="key=$(tfstate_key)"
 
                 - task: AzureCLI@2
                   displayName: 'Terraform Apply'

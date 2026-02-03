@@ -6,13 +6,9 @@ terraform {
     }
   }
   
-  # Uncomment after initial deployment of storage account
-  # backend "azurerm" {
-  #   resource_group_name  = "rg-testing"
-  #   storage_account_name = "tfstatetesting12345"
-  #   container_name       = "tfstate"
-  #   key                  = "terraform.tfstate"
-  # }
+  # Backend configuration - values provided via pipeline variables
+  backend "azurerm" {
+  }
 }
 
 provider "azurerm" {
