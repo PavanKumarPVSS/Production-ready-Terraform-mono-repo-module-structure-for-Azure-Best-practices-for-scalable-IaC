@@ -1,12 +1,23 @@
+# Resource Group Outputs
+output "resource_group_id" {
+  description = "ID of the resource group"
+  value       = module.resource_group.resource_group_id
+}
+
+output "resource_group_name" {
+  description = "Name of the resource group"
+  value       = module.resource_group.resource_group_name
+}
+
 # Storage Account Outputs
 output "storage_account_id" {
   description = "ID of the storage account"
-  value       = azurerm_storage_account.tfstate.id
+  value       = module.tfstate_storage.storage_account_id
 }
 
 output "storage_account_name" {
   description = "Name of the storage account"
-  value       = azurerm_storage_account.tfstate.name
+  value       = module.tfstate_storage.storage_account_name
 }
 
 # VNet Outputs

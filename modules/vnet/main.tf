@@ -1,4 +1,4 @@
-resource "azurerm_virtual_network" "this" {
+resource "azurerm_virtual_network" "test_vnet" {
   name                = var.vnet_name
   location            = var.location
   resource_group_name = var.resource_group_name
@@ -26,7 +26,7 @@ resource "azurerm_network_security_group" "databricks_private" {
 resource "azurerm_subnet" "databricks_public" {
   name                 = var.public_subnet_name
   resource_group_name  = var.resource_group_name
-  virtual_network_name = azurerm_virtual_network.this.name
+  virtual_network_name = azurerm_virtual_network.test_vnet.name
   address_prefixes     = var.public_subnet_prefix
 
   delegation {
@@ -45,7 +45,7 @@ resource "azurerm_subnet" "databricks_public" {
 resource "azurerm_subnet" "databricks_private" {
   name                 = var.private_subnet_name
   resource_group_name  = var.resource_group_name
-  virtual_network_name = azurerm_virtual_network.this.name
+  virtual_network_name = azurerm_virtual_network.test_vnet.name
   address_prefixes     = var.private_subnet_prefix
 
   delegation {

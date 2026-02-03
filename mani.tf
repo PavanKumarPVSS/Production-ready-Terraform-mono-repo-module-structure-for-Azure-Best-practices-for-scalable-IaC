@@ -1,6 +1,9 @@
-resource "azurerm_resource_group" "testing" {
-  name     = var.resource_group_name
-  location = var.location
+# Resource Group Module
+module "resource_group" {
+  source = "./modules/resource_group"
+
+  resource_group_name = var.resource_group_name
+  location            = var.location
 
   tags = {
     environment = var.environment
@@ -8,28 +11,22 @@ resource "azurerm_resource_group" "testing" {
   }
 }
 
-resource "azurerm_storage_account" "tfstate" {
-  name                     = var.storage_account_name
-  resource_group_name      = azurerm_resource_group.testing.name
-  location                 = azurerm_resource_group.testing.location
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-  
-  blob_properties {
-    versioning_enabled = true
-  }
+# Terraform State Storage Module
+module "tfstate_storage" {
+  source = "./modules/tfstate_storage"
+
+  storage_account_name = var.storage_account_name
+  resource_group_name  = module.resource_group.resource_group_name
+  location             = module.resource_group.resource_group_location
+  container_name       = var.container_name
 
   tags = {
     environment = var.environment
     managed_by  = "terraform"
     purpose     = "tfstate"
   }
-}
 
-resource "azurerm_storage_container" "tfstate" {
-  name                  = var.container_name
-  storage_account_name  = azurerm_storage_account.tfstate.name
-  container_access_type = "private"
+  depends_on = [module.resource_group]
 }
 
 # VNet Module for Databricks
@@ -38,7 +35,7 @@ module "databricks_vnet" {
 
   vnet_name           = var.databricks_vnet_name
   location            = var.location
-  resource_group_name = azurerm_resource_group.testing.name
+  resource_group_name = module.resource_group.resource_group_name
   address_space       = var.vnet_address_space
 
   public_subnet_name    = var.databricks_public_subnet_name
@@ -58,7 +55,7 @@ module "databricks_workspace" {
   source = "./modules/databricks"
 
   workspace_name      = var.databricks_workspace_name
-  resource_group_name = azurerm_resource_group.testing.name
+  resource_group_name = module.resource_group.resource_group_name
   location            = var.location
   sku                 = var.databricks_sku
 
@@ -86,7 +83,7 @@ module "unity_catalog" {
   source = "./modules/unity_catalog"
 
   access_connector_name = var.unity_catalog_access_connector_name
-  resource_group_name   = azurerm_resource_group.testing.name
+  resource_group_name   = module.resource_group.resource_group_name
   location              = var.location
   storage_account_name  = var.unity_catalog_storage_account_name
   container_name        = var.unity_catalog_container_name

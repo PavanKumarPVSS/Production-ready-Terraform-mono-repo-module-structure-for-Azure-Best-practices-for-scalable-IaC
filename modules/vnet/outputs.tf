@@ -1,11 +1,11 @@
 output "vnet_id" {
   description = "ID of the virtual network"
-  value       = azurerm_virtual_network.this.id
+  value       = azurerm_virtual_network.test_vnet.id
 }
 
 output "vnet_name" {
   description = "Name of the virtual network"
-  value       = azurerm_virtual_network.this.name
+  value       = azurerm_virtual_network.test_vnet.name
 }
 
 output "public_subnet_id" {
