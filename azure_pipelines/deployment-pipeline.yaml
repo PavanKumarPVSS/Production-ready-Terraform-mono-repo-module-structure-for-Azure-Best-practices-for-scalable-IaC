@@ -1,0 +1,171 @@
+trigger: none
+
+# IMPORTANT: Update 'name' to match your Azure DevOps agent pool name
+# Use 'Azure Pipelines' for Microsoft-hosted agents or your self-hosted agent pool name
+pool:
+  name: 'Agent'  # Replace with your organization's self-hosted agent pool name
+
+variables:
+  - name: workingDirectory
+    value: '$(System.DefaultWorkingDirectory)'
+  # IMPORTANT: Create variable group 'TFstate-variables' in Azure DevOps with:
+  #   - tfstate_resource_group_name: Resource group containing state storage
+  #   - tfstate_storage_account_name: Storage account name for state files
+  #   - tfstate_container_name: Container name (e.g., 'tfstate')
+  #   - tfstate_key: Base state file name (e.g., 'terraform.tfstate')
+  # Add additional variable groups as needed for your environment
+  - group: 'TFstate-variables'
+
+stages:
+  # Validate Stage
+  - stage: Prod_Validate
+    displayName: 'Production - Validate'
+    jobs:
+      - job: Validate
+        displayName: 'Validate Terraform Configuration'
+        steps:
+          - task: AzureCLI@2
+            displayName: 'Terraform Init (Production)'
+            inputs:
+              azureSubscription: 'terraformdeployement'
+              scriptType: 'ps'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                cd $(workingDirectory)
+                terraform init `
+                  -backend-config="resource_group_name=$(tfstate_resource_group_name)" `
+                  -backend-config="storage_account_name=$(tfstate_storage_account_name)" `
+                  -backend-config="container_name=$(tfstate_container_name)" `
+                  -backend-config="key=prod-$(tfstate_key)"
+
+          - task: AzureCLI@2
+            displayName: 'Terraform Validate (Production)'
+            inputs:
+              azureSubscription: 'terraformdeployement'
+              scriptType: 'ps'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                cd $(workingDirectory)
+                terraform validate
+
+  # Plan Stage with Approval Gate
+  - stage: Prod_Plan
+    displayName: 'Production - Plan'
+    dependsOn: Prod_Validate
+    condition: succeeded()
+    jobs:
+      - job: WaitForPlanApproval
+        displayName: 'Wait for Plan Approval'
+        pool: server
+        steps:
+          - task: ManualValidation@0
+            displayName: 'Approve Plan Execution'
+            inputs:
+              notifyUsers: ''
+              instructions: 'Please review the validation results and approve to proceed with Terraform Plan for Production environment.'
+              onTimeout: 'reject'
+
+      - job: Plan
+        displayName: 'Plan Infrastructure Changes'
+        dependsOn: WaitForPlanApproval
+        steps:
+          - task: AzureCLI@2
+            displayName: 'Terraform Init (Production)'
+            inputs:
+              azureSubscription: 'terraformdeployement'
+              scriptType: 'ps'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                cd $(workingDirectory)
+                terraform init `
+                  -backend-config="resource_group_name=$(tfstate_resource_group_name)" `
+                  -backend-config="storage_account_name=$(tfstate_storage_account_name)" `
+                  -backend-config="container_name=$(tfstate_container_name)" `
+                  -backend-config="key=prod-$(tfstate_key)"
+
+          - task: AzureCLI@2
+            displayName: 'Terraform Plan (Production)'
+            inputs:
+              azureSubscription: 'terraformdeployement'
+              scriptType: 'ps'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                cd $(workingDirectory)
+                terraform plan -var-file="environments/production.tfvars" -out=prod-tfplan
+
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish Production Plan'
+            inputs:
+              targetPath: '$(workingDirectory)/prod-tfplan'
+              artifact: 'prod-terraform-plan'
+              publishLocation: 'pipeline'
+
+  # Apply Stage with Approval Gate
+  - stage: Prod_Apply
+    displayName: 'Production - Apply'
+    dependsOn: Prod_Plan
+    condition: succeeded()
+    jobs:
+      - deployment: WaitForApplyApproval
+        displayName: 'Wait for Apply Approval'
+        environment: 'Production'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: ManualValidation@0
+                  displayName: 'Approve Infrastructure Deployment'
+                  inputs:
+                    notifyUsers: ''
+                    instructions: 'Please review the Terraform Plan output and approve to apply changes to Production environment. This action will modify your Azure infrastructure.'
+                    onTimeout: 'reject'
+
+      - deployment: Apply
+        displayName: 'Apply Infrastructure Changes'
+        dependsOn: WaitForApplyApproval
+        environment: 'Production'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+
+                - task: DownloadPipelineArtifact@2
+                  displayName: 'Download Production Plan'
+                  inputs:
+                    artifact: 'prod-terraform-plan'
+                    path: $(workingDirectory)
+
+                - task: AzureCLI@2
+                  displayName: 'Terraform Init (Production)'
+                  inputs:
+                    azureSubscription: 'terraformdeployement'
+                    scriptType: 'ps'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      cd $(workingDirectory)
+                      terraform init `
+                        -backend-config="resource_group_name=$(tfstate_resource_group_name)" `
+                        -backend-config="storage_account_name=$(tfstate_storage_account_name)" `
+                        -backend-config="container_name=$(tfstate_container_name)" `
+                        -backend-config="key=prod-$(tfstate_key)"
+
+                - task: AzureCLI@2
+                  displayName: 'Terraform Apply (Production)'
+                  inputs:
+                    azureSubscription: 'terraformdeployement'
+                    scriptType: 'ps'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      cd $(workingDirectory)
+                      terraform apply -auto-approve prod-tfplan
+
+                - task: AzureCLI@2
+                  displayName: 'Terraform Output (Production)'
+                  inputs:
+                    azureSubscription: 'terraformdeployement'
+                    scriptType: 'ps'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      cd $(workingDirectory)
+                      terraform output

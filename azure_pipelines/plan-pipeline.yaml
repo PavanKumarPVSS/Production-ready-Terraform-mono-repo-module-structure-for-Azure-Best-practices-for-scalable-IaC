@@ -1,0 +1,160 @@
+trigger: none
+
+# IMPORTANT: Update 'name' to match your Azure DevOps agent pool name
+# Use 'Azure Pipelines' for Microsoft-hosted agents or your self-hosted agent pool name
+pool:
+  name: 'Agent'  # Replace with your organization's self-hosted agent pool name
+
+variables:
+  - name: workingDirectory
+    value: '$(System.DefaultWorkingDirectory)'
+  # IMPORTANT: Create variable group 'TFstate-variables' in Azure DevOps with:
+  #   - tfstate_resource_group_name: Resource group containing state storage
+  #   - tfstate_storage_account_name: Storage account name for state files
+  #   - tfstate_container_name: Container name (e.g., 'tfstate')
+  #   - tfstate_key: Base state file name (e.g., 'terraform.tfstate')
+  # Add additional variable groups as needed for your environment
+  - group: 'TFstate-variables'
+
+stages:
+  # Development Environment
+  - stage: Dev_Validate
+    displayName: 'Dev - Validate'
+    jobs:
+      - job: Validate
+        displayName: 'Validate Terraform Configuration'
+        steps:
+          - task: AzureCLI@2
+            displayName: 'Terraform Init (Dev)'
+            inputs:
+              azureSubscription: 'terraformdeployement'
+              scriptType: 'ps'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                cd $(workingDirectory)
+                terraform init `
+                  -backend-config="resource_group_name=$(tfstate_resource_group_name)" `
+                  -backend-config="storage_account_name=$(tfstate_storage_account_name)" `
+                  -backend-config="container_name=$(tfstate_container_name)" `
+                  -backend-config="key=dev-$(tfstate_key)"
+
+          - task: AzureCLI@2
+            displayName: 'Terraform Validate (Dev)'
+            inputs:
+              azureSubscription: 'terraformdeployement'
+              scriptType: 'ps'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                cd $(workingDirectory)
+                terraform validate
+
+  - stage: Dev_Plan
+    displayName: 'Dev - Plan'
+    dependsOn: Dev_Validate
+    condition: succeeded()
+    jobs:
+      - job: Plan
+        displayName: 'Plan Infrastructure Changes'
+        steps:
+          - task: AzureCLI@2
+            displayName: 'Terraform Init (Dev)'
+            inputs:
+              azureSubscription: 'terraformdeployement'
+              scriptType: 'ps'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                cd $(workingDirectory)
+                terraform init `
+                  -backend-config="resource_group_name=$(tfstate_resource_group_name)" `
+                  -backend-config="storage_account_name=$(tfstate_storage_account_name)" `
+                  -backend-config="container_name=$(tfstate_container_name)" `
+                  -backend-config="key=dev-$(tfstate_key)"
+
+          - task: AzureCLI@2
+            displayName: 'Terraform Plan (Dev)'
+            inputs:
+              azureSubscription: 'terraformdeployement'
+              scriptType: 'ps'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                cd $(workingDirectory)
+                terraform plan -var-file="environments/development.tfvars" -out=dev-tfplan
+
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish Dev Plan'
+            inputs:
+              targetPath: '$(workingDirectory)/dev-tfplan'
+              artifact: 'dev-terraform-plan'
+              publishLocation: 'pipeline'
+
+  # QA Environment
+  - stage: QA_Validate
+    displayName: 'QA - Validate'
+    dependsOn: Dev_Plan
+    condition: succeeded()
+    jobs:
+      - job: Validate
+        displayName: 'Validate Terraform Configuration'
+        steps:
+          - task: AzureCLI@2
+            displayName: 'Terraform Init (QA)'
+            inputs:
+              azureSubscription: 'terraformdeployement'
+              scriptType: 'ps'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                cd $(workingDirectory)
+                terraform init `
+                  -backend-config="resource_group_name=$(tfstate_resource_group_name)" `
+                  -backend-config="storage_account_name=$(tfstate_storage_account_name)" `
+                  -backend-config="container_name=$(tfstate_container_name)" `
+                  -backend-config="key=qa-$(tfstate_key)"
+
+          - task: AzureCLI@2
+            displayName: 'Terraform Validate (QA)'
+            inputs:
+              azureSubscription: 'terraformdeployement'
+              scriptType: 'ps'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                cd $(workingDirectory)
+                terraform validate
+
+  - stage: QA_Plan
+    displayName: 'QA - Plan'
+    dependsOn: QA_Validate
+    condition: succeeded()
+    jobs:
+      - job: Plan
+        displayName: 'Plan Infrastructure Changes'
+        steps:
+          - task: AzureCLI@2
+            displayName: 'Terraform Init (QA)'
+            inputs:
+              azureSubscription: 'terraformdeployement'
+              scriptType: 'ps'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                cd $(workingDirectory)
+                terraform init `
+                  -backend-config="resource_group_name=$(tfstate_resource_group_name)" `
+                  -backend-config="storage_account_name=$(tfstate_storage_account_name)" `
+                  -backend-config="container_name=$(tfstate_container_name)" `
+                  -backend-config="key=qa-$(tfstate_key)"
+
+          - task: AzureCLI@2
+            displayName: 'Terraform Plan (QA)'
+            inputs:
+              azureSubscription: 'terraformdeployement'
+              scriptType: 'ps'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                cd $(workingDirectory)
+                terraform plan -var-file="environments/qa.tfvars" -out=qa-tfplan
+
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publish QA Plan'
+            inputs:
+              targetPath: '$(workingDirectory)/qa-tfplan'
+              artifact: 'qa-terraform-plan'
+              publishLocation: 'pipeline'
