@@ -82,3 +82,62 @@ output "unity_catalog_principal_id" {
   description = "Principal ID of the Access Connector for Unity Catalog"
   value       = module.unity_catalog.access_connector_principal_id
 }
+
+# App Service Outputs
+output "service_plan_id" {
+  description = "ID of the App Service Plan"
+  value       = module.bot_app_service.service_plan_id
+}
+
+output "web_app_id" {
+  description = "ID of the Bot Web App"
+  value       = module.bot_app_service.web_app_id
+}
+
+output "web_app_name" {
+  description = "Name of the Bot Web App"
+  value       = module.bot_app_service.web_app_name
+}
+
+output "web_app_url" {
+  description = "URL of the Bot Web App"
+  value       = module.bot_app_service.web_app_url
+}
+
+output "bot_messaging_endpoint" {
+  description = "Bot messaging endpoint URL"
+  value       = module.bot_app_service.bot_endpoint
+}
+
+# Azure Bot Outputs
+output "bot_id" {
+  description = "ID of the Azure Bot"
+  value       = module.azure_bot.bot_id
+}
+
+output "bot_name" {
+  description = "Name of the Azure Bot"
+  value       = module.azure_bot.bot_name
+}
+
+output "bot_microsoft_app_id" {
+  description = "Microsoft App ID of the Azure Bot"
+  value       = module.azure_bot.bot_microsoft_app_id
+}
+
+output "bot_app_insights_id" {
+  description = "ID of the Application Insights instance for bot"
+  value       = module.azure_bot.app_insights_id
+}
+
+output "bot_app_insights_instrumentation_key" {
+  description = "Instrumentation key for bot Application Insights"
+  value       = module.azure_bot.app_insights_instrumentation_key
+  sensitive   = true
+}
+
+output "bot_app_insights_connection_string" {
+  description = "Connection string for bot Application Insights"
+  value       = module.azure_bot.app_insights_connection_string
+  sensitive   = true
+}

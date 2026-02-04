@@ -94,3 +94,47 @@ module "unity_catalog" {
     purpose     = "unity-catalog"
   }
 }
+
+# App Service Module for Bot
+module "bot_app_service" {
+  source = "./modules/app_service"
+
+  resource_group_name = module.resource_group.resource_group_name
+  location            = var.location
+  service_plan_name   = var.service_plan_name
+  os_type             = var.app_service_os_type
+  sku_name            = var.app_service_sku
+  web_app_name        = var.web_app_name
+  node_version        = var.node_version
+
+  tags = {
+    environment = var.environment
+    managed_by  = "terraform"
+    purpose     = "bot-backend"
+  }
+
+  depends_on = [module.resource_group]
+}
+
+# Azure Bot Module
+module "azure_bot" {
+  source = "./modules/azure_bot"
+
+  resource_group_name = module.resource_group.resource_group_name
+  location            = var.location
+  app_insights_name   = var.app_insights_name
+  api_key_name        = var.app_insights_api_key_name
+  bot_name            = var.bot_name
+  bot_location        = "global"
+  bot_sku             = var.bot_sku
+  bot_endpoint        = module.bot_app_service.bot_endpoint
+
+  tags = {
+    environment = var.environment
+    managed_by  = "terraform"
+    purpose     = "azure-bot"
+  }
+
+  depends_on = [module.resource_group, module.bot_app_service]
+}
+

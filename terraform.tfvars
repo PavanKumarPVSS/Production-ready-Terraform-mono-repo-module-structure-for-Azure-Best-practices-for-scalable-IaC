@@ -18,3 +18,16 @@ databricks_no_public_ip   = true
 unity_catalog_access_connector_name = "dbw-access-connector"
 unity_catalog_storage_account_name  = "unitycatalogstore123"
 unity_catalog_container_name        = "unity-catalog"
+
+# App Service Configuration
+service_plan_name    = "bot-service-plan"
+app_service_os_type  = "Linux"
+app_service_sku      = "F1"
+web_app_name         = "my-bot-webapp"
+node_version         = "18-lts"
+
+# Azure Bot Configuration
+bot_name                  = "my-azure-bot"
+bot_sku                   = "F0"
+app_insights_name         = "bot-app-insights"
+app_insights_api_key_name = "bot-api-key"
