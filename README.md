@@ -32,7 +32,7 @@ This repository provides a **real-world Terraform mono-repo pattern** used in en
 
 This repository uses a **Terraform mono-repo pattern** with reusable modules, environment-specific configurations, and automated CI/CD pipelines for Azure:
 
-```text
+```
 .
 ├── modules/                       # Reusable Terraform modules
 │   ├── resource_group/           # Azure Resource Group module
@@ -52,7 +52,9 @@ This repository uses a **Terraform mono-repo pattern** with reusable modules, en
 │   │   └── README.md            # Module documentation
 │   ├── storage_account/          # Generic Storage Account with containers/queues/tables
 │   │   └── README.md            # Module documentation
-│   └── key_vault/                # Key Vault with secrets, keys, and access policies
+│   ├── key_vault/                # Key Vault with secrets, keys, and access policies
+│   │   └── README.md            # Module documentation
+│   └── function_app/             # Azure Function Apps (Consumption/Premium/Dedicated)
 │       └── README.md            # Module documentation
 ├── environments/                  # Environment-specific configurations
 │   ├── development.tfvars        # Development environment variables
@@ -62,11 +64,12 @@ This repository uses a **Terraform mono-repo pattern** with reusable modules, en
 │   ├── plan-pipeline.yaml        # Dev/QA validation and planning pipeline
 │   ├── deployment-pipeline.yaml  # Production deployment with approval gates
 │   └── README.md                 # Pipeline documentation
-├── provider.tf                    # Provider configuration (AzureRM)
+├── providers.tf                   # Provider configuration (AzureRM)
 ├── variables.tf                   # Global variable definitions
 ├── outputs.tf                     # Root outputs
 ├── main.tf                        # Main Terraform entrypoint (calls modules)
 └── README.md                      # This documentation
+```
 
 ## Use Cases
 
@@ -95,6 +98,7 @@ This repository is ideal for:
 
 ### Application Services
 - **[app_service](modules/app_service/)** - App Service Plan and Web Apps (Linux/Windows support)
+- **[function_app](modules/function_app/)** - Azure Function Apps (Consumption/Premium/Dedicated plans, multi-runtime)
 - **[azure_bot](modules/azure_bot/)** - Azure Bot Service with Application Insights monitoring
 
 Each module includes:
