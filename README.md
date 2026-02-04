@@ -54,6 +54,10 @@ This repository uses a **Terraform mono-repo pattern** with reusable modules, en
 │   │   └── README.md            # Module documentation
 │   ├── key_vault/                # Key Vault with secrets, keys, and access policies
 │   │   └── README.md            # Module documentation
+│   ├── log_analytics/            # Log Analytics Workspace for monitoring
+│   │   └── README.md            # Module documentation
+│   ├── aks/                      # Azure Kubernetes Service cluster
+│   │   └── README.md            # Module documentation
 │   └── function_app/             # Azure Function Apps (Consumption/Premium/Dedicated)
 │       └── README.md            # Module documentation
 ├── environments/                  # Environment-specific configurations
@@ -76,6 +80,9 @@ This repository uses a **Terraform mono-repo pattern** with reusable modules, en
 This repository is ideal for:
 - Enterprise Terraform mono-repos
 - Azure landing zones and cloud migrations
+- Kubernetes deployments with AKS
+- Containerized application infrastructure
+- Microservices architectures
 - Databricks deployments with Unity Catalog
 - Bot development and AI workloads
 - Platform engineering teams
@@ -91,6 +98,10 @@ This repository is ideal for:
 - **[vnet](modules/vnet/)** - Virtual Network with subnets and NSGs
 - **[storage_account](modules/storage_account/)** - Generic Storage Account with containers, queues, tables, and file shares
 - **[key_vault](modules/key_vault/)** - Key Vault with secrets, keys, and access policies
+- **[log_analytics](modules/log_analytics/)** - Log Analytics Workspace for monitoring and diagnostics
+
+### Container & Kubernetes
+- **[aks](modules/aks/)** - Azure Kubernetes Service with auto-scaling, monitoring, and security features
 
 ### Data & Analytics
 - **[databricks](modules/databricks/)** - Azure Databricks workspace with VNet injection
@@ -112,9 +123,10 @@ Each module includes:
 
 This repository follows a layered Terraform architecture:
 
-- **Foundation layer**: Resource groups, state storage, networking, Key Vault
-- **Platform layer**: Databricks, Unity Catalog, shared storage
-- **Application layer**: App Services and Azure Bot workloads
+- **Foundation layer**: Resource groups, state storage, networking, Key Vault, Log Analytics
+- **Container layer**: AKS clusters with monitoring and security
+- **Platform layer**: Databricks, Unity Catalog, shared storage, ACR
+- **Application layer**: App Services, Function Apps, and Azure Bot workloads
 
 This separation improves reusability, governance, and environment isolation.
 
