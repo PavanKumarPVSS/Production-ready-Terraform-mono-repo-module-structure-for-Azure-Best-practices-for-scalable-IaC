@@ -6,15 +6,24 @@ This folder contains Azure DevOps pipeline definitions for Terraform infrastruct
 
 ### 1. plan-pipeline.yaml
 
-**Purpose**: Validates and plans infrastructure changes for Development and QA environments.
+**Purpose**: Validates and plans infrastructure changes for Development and QA environments with environment selection.
+
+**Parameters**:
+- **environment**: Choose which environment to plan
+  - `development` - Run Dev_Validate and Dev_Plan stages only
+  - `qa` - Run QA_Validate and QA_Plan stages only
+  - `both` - Run all stages (Dev and QA)
 
 **Stages**:
-- **Dev_Validate**: Initialize and validate Terraform configuration for Dev
-- **Dev_Plan**: Generate execution plan for Dev environment using `environments/development.tfvars`
-- **QA_Validate**: Initialize and validate Terraform configuration for QA
-- **QA_Plan**: Generate execution plan for QA environment using `environments/qa.tfvars`
+- **Dev_Validate**: Initialize and validate Terraform configuration for Dev (runs when `development` or `both` selected)
+- **Dev_Plan**: Generate execution plan for Dev environment using `environments/development.tfvars` (runs when `development` or `both` selected)
+- **QA_Validate**: Initialize and validate Terraform configuration for QA (runs when `qa` or `both` selected)
+- **QA_Plan**: Generate execution plan for QA environment using `environments/qa.tfvars` (runs when `qa` or `both` selected)
 
-**Usage**: Run this pipeline to review planned changes before applying them to Dev/QA environments.
+**Usage**: 
+1. Run the pipeline and select your target environment from the dropdown
+2. Review the plan output for the selected environment
+3. Each environment runs independently based on your selection
 
 ### 2. deployment-pipeline.yaml
 
@@ -67,9 +76,12 @@ This isolation prevents environment interference and allows independent infrastr
 
 ## Pipeline Execution Flow
 
-### Plan Pipeline (Dev & QA)
+### Plan Pipeline (Environment-Based)
 ```
-Dev_Validate → Dev_Plan → QA_Validate → QA_Plan
+Parameter Selection:
+- development: Dev_Validate → Dev_Plan
+- qa:          QA_Validate → QA_Plan
+- both:        Dev_Validate → Dev_Plan (parallel) QA_Validate → QA_Plan
 ```
 
 ### Deployment Pipeline (Production)
@@ -90,6 +102,8 @@ Prod_Validate → [Approval] → Prod_Plan → [Approval] → Prod_Apply
 ## Best Practices
 
 - ✅ Always review plan outputs before approving
+- ✅ Select specific environment in plan pipeline to reduce execution time
+- ✅ Use `both` option only when validating changes across multiple environments
 - ✅ Use plan pipeline for Dev/QA to verify changes
 - ✅ Only use deployment pipeline for Production
 - ✅ Keep separate state files for each environment

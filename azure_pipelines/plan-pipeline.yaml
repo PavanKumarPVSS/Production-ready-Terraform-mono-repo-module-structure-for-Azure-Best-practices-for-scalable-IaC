@@ -1,5 +1,16 @@
 trigger: none
 
+# IMPORTANT: Select which environment to validate and plan
+parameters:
+  - name: environment
+    displayName: 'Environment to Plan'
+    type: string
+    default: 'development'
+    values:
+      - development
+      - qa
+      - both
+
 # IMPORTANT: Update 'name' to match your Azure DevOps agent pool name
 # Use 'Azure Pipelines' for Microsoft-hosted agents or your self-hosted agent pool name
 pool:
@@ -20,6 +31,7 @@ stages:
   # Development Environment
   - stage: Dev_Validate
     displayName: 'Dev - Validate'
+    condition: or(eq('${{ parameters.environment }}', 'development'), eq('${{ parameters.environment }}', 'both'))
     jobs:
       - job: Validate
         displayName: 'Validate Terraform Configuration'
@@ -51,7 +63,7 @@ stages:
   - stage: Dev_Plan
     displayName: 'Dev - Plan'
     dependsOn: Dev_Validate
-    condition: succeeded()
+    condition: and(succeeded(), or(eq('${{ parameters.environment }}', 'development'), eq('${{ parameters.environment }}', 'both')))
     jobs:
       - job: Plan
         displayName: 'Plan Infrastructure Changes'
@@ -90,8 +102,8 @@ stages:
   # QA Environment
   - stage: QA_Validate
     displayName: 'QA - Validate'
-    dependsOn: Dev_Plan
-    condition: succeeded()
+    dependsOn: []
+    condition: or(eq('${{ parameters.environment }}', 'qa'), eq('${{ parameters.environment }}', 'both'))
     jobs:
       - job: Validate
         displayName: 'Validate Terraform Configuration'
@@ -123,7 +135,7 @@ stages:
   - stage: QA_Plan
     displayName: 'QA - Plan'
     dependsOn: QA_Validate
-    condition: succeeded()
+    condition: and(succeeded(), or(eq('${{ parameters.environment }}', 'qa'), eq('${{ parameters.environment }}', 'both')))
     jobs:
       - job: Plan
         displayName: 'Plan Infrastructure Changes'

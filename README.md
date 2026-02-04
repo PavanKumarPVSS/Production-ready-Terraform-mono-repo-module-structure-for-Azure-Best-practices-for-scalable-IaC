@@ -199,8 +199,10 @@ For automated deployments using Azure DevOps:
 
 2. **Run Plan Pipeline** (Dev & QA)
    - Use `azure_pipelines/plan-pipeline.yaml`
-   - Validates and plans changes for Dev and QA environments
+   - **Select environment** parameter: `development`, `qa`, or `both`
+   - Validates and plans changes for selected environment(s)
    - No manual approval required
+   - Automatically uses correct tfvars file based on selection
 
 3. **Run Deployment Pipeline** (Production)
    - Use `azure_pipelines/deployment-pipeline.yaml`
@@ -261,9 +263,12 @@ terraform apply -var-file="environments/production.tfvars"
 ## CI/CD Pipeline Strategy
 
 ### Plan Pipeline (Dev & QA)
-- Runs `init`, `validate`, and `plan` for Dev and QA
+- **Environment Selection**: Choose `development`, `qa`, or `both` when running pipeline
+- Runs `init`, `validate`, and `plan` for selected environment(s)
 - No approval gates - automated validation
 - Generates plan artifacts for review
+- Automatically uses correct tfvars file based on selection
+- Dev and QA stages run independently when selected individually
 - Pipeline: [azure_pipelines/plan-pipeline.yaml](azure_pipelines/plan-pipeline.yaml)
 
 ### Deployment Pipeline (Production)
